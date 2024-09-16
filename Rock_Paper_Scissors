@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+int inputValue() {
+    double result;
+    while (1) {
+        if (scanf("%lf", &result) == 1) {
+            return (int)result;
+        }
+        while(getchar() != '\n'); // pulisci memoria perch� C senn� muore
+    }
+}
+
+int main() {
+    int mossaPc, mossaUtente;
+    char playAgain;
+
+    srand(time(NULL)); // Seed the random number generator
+    printf("Benvenut* a carta forbice sasso!\n");
+
+    do {
+        printf("Per iniziare scegli tra carta (1), forbice (2) o sasso (3)\n");
+        mossaUtente = inputValue();
+        mossaPc = rand() % 3 + 1; // Generate a random number between 1 and 3
+
+        if (mossaPc == mossaUtente) {
+            printf("Pareggio: ripetere!\n");
+        } else {
+            if (mossaPc == 1 && mossaUtente == 2) {
+                printf("Vince usr: la forbice taglia la carta!\n");
+            } else if (mossaPc == 1 && mossaUtente == 3) {
+                printf("Vince pc: la carta avvolge il sasso!\n");
+            } else if (mossaPc == 2 && mossaUtente == 1) {
+                printf("Vince pc: la forbice taglia la carta!\n");
+            } else if (mossaPc == 2 && mossaUtente == 3) {
+                printf("Vince usr: il sasso rompe la forbice!\n");
+            } else if (mossaPc == 3 && mossaUtente == 1) {
+                printf("Vince usr: la carta avvolge il sasso!\n");
+            } else if (mossaPc == 3 && mossaUtente == 2) {
+                printf("Vince pc: il sasso rompe la forbice!\n");
+            }
+        }
+
+        printf("Vuoi giocare di nuovo? (y/n): ");
+        while(getchar() != '\n'); // clear the input buffer
+        scanf("%c", &playAgain);
+    } while (playAgain == 'y' || playAgain == 'Y');
+
+    printf("Grazie per aver giocato!\n");
+
+    return 0;
+}
