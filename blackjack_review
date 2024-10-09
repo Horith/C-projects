@@ -1,0 +1,177 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+// Function prototypes
+int usrTurn();
+int cpuTurn();
+
+int main() {
+    srand(time(NULL));
+
+    // Initial card draw
+    int usrCard1 = usrTurn();
+    int usrCard2 = usrTurn();
+    int cpuCard1 = cpuTurn();
+    int cpuCard2 = cpuTurn();
+    int risposta, bet, usrSum;
+
+
+    int    cpuSum = cpuCard1 + cpuCard2;
+    char   choice[10];  // Large enough for "stand",  "hit" and double
+    int    saldo = 500;
+
+
+    // Display initial card draws
+    //in future will add surrender function
+    printf("benvenuto al tavolo, quanto vuoi puntare?: ");
+    scanf("%d", &bet);
+    while (getchar() != '\n');
+    printf("hai puntato: %d \ninizio del gioco:", bet);
+    sleep(3);
+    printf("\nPescando carte...");
+    sleep(3);
+    printf("\nGiocatore ha pescato la prima carta: %d", usrCard1);
+
+    if (usrCard1 == 1){
+        printf("\nil giocatore ha pescato un asso, vuole farlo valere [1] oppure [11] ?: "); //make an ace 1 or 11 following the official rules of blackjack
+        scanf("%d", &risposta);
+        while (getchar() != '\n');
+
+        if(risposta == 11){
+            usrCard1 = 11;
+            printf("valore assegnato: %d", usrCard1);
+        }
+    }
+    sleep(1);
+    printf("\nDealer ha pescato e copre la prima carta...");
+    sleep(1);
+    printf("\nGiocatore ha pescato la seconda carta: %d", usrCard2);
+
+    if (usrCard2 == 1){
+        printf("\ne ha pescato un asso, vuole farlo valere [1] oppure [11] ?: "); //make an ace 1 or 11 following the official rules of blackjack
+        scanf("%d", &risposta);
+        while (getchar() != '\n');
+
+        if(risposta == 11){
+            usrCard2 = 11;
+            printf("valore assegnato: %d", usrCard2);
+        }
+    }
+    usrSum = usrCard1 + usrCard2;
+    sleep(1);
+    printf("\nDealer ha pescato la seconda carta: %d", cpuCard2);
+    sleep(1);
+    printf("\nPunteggio attuale utente: %d, punteggio attuale dealer (carta visibile): %d", usrSum, cpuCard2);
+
+    // User's turn: Hit or Stand                might add functions later
+    while (1) {
+        printf("\nVuoi estrarre una carta (hit), rimanere (stand) oppure raddoppiare (double) ?: ");
+        fgets(choice, sizeof(choice), stdin);
+        choice[strcspn(choice, "\n")] = 0;  // Remove newline
+
+        if (strcmp(choice, "double") == 0) {
+            bet = bet * 2;
+            int newCard = usrTurn();
+            usrSum += newCard;
+
+            printf("\nHai pescato una carta: %d", newCard);
+
+            if (newCard == 1){
+                printf("\nil giocatore ha pescato un asso, vuole farlo valere [1] oppure [11] ?: "); //make an ace 1 or 11 following the official rules of blackjack
+                scanf("%d", &risposta);
+
+                if(risposta == 11){
+                    newCard = 11;
+                    printf("valore assegnato: %d", newCard);
+                    break;
+                }
+            }
+
+        } else if (strcmp(choice, "hit") == 0) {
+            // Player draws a new card
+            int newCard = usrTurn();
+            usrSum += newCard;
+
+            printf("\nHai pescato una carta: %d", newCard);
+
+            if (newCard == 1){
+                printf("\nil giocatore ha pescato un asso, vuole farlo valere [1] oppure [11] ?: "); //make an ace 1 or 11 following the official rules of blackjack
+                scanf("%d", &risposta);
+
+                if(risposta == 11){
+                    newCard = 11;
+                    printf("valore assegnato: %d", newCard);
+                }
+            }
+            printf("\nIl tuo punteggio attuale è: %d", usrSum);
+
+            if (usrSum > 21) {
+                printf("\nHai sballato!");
+                return 0;
+            } else if (usrSum == 21) {
+                printf("\nHai fatto 21! Vediamo cosa fa il dealer...");
+                break;
+            }
+        } else if (strcmp(choice, "stand") == 0) {
+            printf("\nHai scelto stand, ora è il turno del dealer.");
+            break;
+        } else {
+            printf("\nScelta non valida, riprova.");
+        }
+    }
+
+    // Dealer's turn
+    while (cpuSum < 17) {
+        int newCpuCard = cpuTurn();
+        cpuSum += newCpuCard;
+        printf("\nDealer ha pescato una carta: %d", newCpuCard);
+    }
+
+    printf("\nPunteggio finale utente: %d, punteggio finale dealer: %d", usrSum, cpuSum);
+
+    // Determine the winner
+    if (cpuSum > 21) {
+        printf("\nIl banco ha sballato! Hai vinto!");
+        bet * 2;
+        saldo += bet;
+    } else if (cpuSum == 21 && usrSum == 21){
+        printf("\nPAREGGIO (PUSH): il saldo rimane invariato: %d", saldo);
+    } else if (cpuSum == 21) {
+        printf("\nIl banco ha fatto 21! Hai perso!");
+        saldo = saldo - bet;
+    } else if (usrSum == cpuSum) {
+        printf("\nPareggio!");
+    } else if (usrSum > 21) {
+        printf("\nHai sballato! Il banco vince.");
+        saldo -= bet;
+    } else if (usrSum > cpuSum) {
+        printf("\nHai vinto!");
+        bet * 2;
+        saldo += bet;
+    } else {
+        printf("\nIl banco ha vinto!");
+        saldo -= bet;
+
+    }
+    printf("\nsaldo attuale: %d", saldo);
+    return 0;
+}
+
+// Player draw card function
+int usrTurn() {
+    int card = rand() % 13 + 1; // Card from 1 to 13
+    if (card > 10) {
+        card = 10;  // Face cards (J, Q, K) are worth 10 points
+    }
+    return card;
+}
+
+// Dealer draw card function
+int cpuTurn() {
+    int cpuCard = rand() % 13 + 1;
+    if (cpuCard > 10) {
+        cpuCard = 10;
+    }
+    return cpuCard;
+}
